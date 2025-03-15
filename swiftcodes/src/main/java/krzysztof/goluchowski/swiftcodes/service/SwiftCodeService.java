@@ -2,6 +2,8 @@ package krzysztof.goluchowski.swiftcodes.service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
+import krzysztof.goluchowski.swiftcodes.dto.BranchDto;
+import krzysztof.goluchowski.swiftcodes.dto.HeadQuarterWithBranchesDto;
 import krzysztof.goluchowski.swiftcodes.model.SwiftCode;
 import krzysztof.goluchowski.swiftcodes.repository.SwiftCodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Service;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,5 +58,48 @@ public class SwiftCodeService {
                 row[6].trim().toUpperCase(),
                 row[7].trim()
         );
+    }
+
+    public Optional<HeadQuarterWithBranchesDto> getHeadquarterWithBranches(String swiftCode) {
+        Optional<SwiftCode> headquarter = repository.findById(swiftCode);
+
+        if (headquarter.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<BranchDto> branches = repository.findBySwiftCodeStartingWith(swiftCode.substring(0, 8))
+                .stream()
+                .filter(branch -> !branch.getSwiftCode().equals(swiftCode))
+                .map(branch -> new BranchDto(
+                        branch.getAddress(),
+                        branch.getBankName(),
+                        branch.getCountryISO2(),
+                        branch.getCountryName(),
+                        branch.isHeadquarter(),
+                        branch.getSwiftCode()
+                ))
+                .collect(Collectors.toList());
+
+        return Optional.of(new HeadQuarterWithBranchesDto(
+                headquarter.get().getAddress(),
+                headquarter.get().getBankName(),
+                headquarter.get().getCountryISO2(),
+                headquarter.get().getCountryName(),
+                headquarter.get().isHeadquarter(),
+                headquarter.get().getSwiftCode(),
+                branches
+        ));
+    }
+
+    public Optional<BranchDto> getBranch(String swiftCode) {
+        return repository.findById(swiftCode)
+                .map(branch -> new BranchDto(
+                        branch.getAddress(),
+                        branch.getBankName(),
+                        branch.getCountryISO2(),
+                        branch.getCountryName(),
+                        branch.isHeadquarter(),
+                        branch.getSwiftCode()
+                ));
     }
 }
