@@ -3,7 +3,9 @@ package krzysztof.goluchowski.swiftcodes.service;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import krzysztof.goluchowski.swiftcodes.dto.BranchDto;
+import krzysztof.goluchowski.swiftcodes.dto.CountrySwiftCodesDto;
 import krzysztof.goluchowski.swiftcodes.dto.HeadQuarterWithBranchesDto;
+import krzysztof.goluchowski.swiftcodes.dto.SwiftCodeDto;
 import krzysztof.goluchowski.swiftcodes.model.SwiftCode;
 import krzysztof.goluchowski.swiftcodes.repository.SwiftCodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -101,5 +103,27 @@ public class SwiftCodeService {
                         branch.isHeadquarter(),
                         branch.getSwiftCode()
                 ));
+    }
+
+    public Optional<CountrySwiftCodesDto> getSwiftCodesByCountry(String countryISO2) {
+        List<SwiftCode> swiftCodes = repository.findByCountryISO2IgnoreCase(countryISO2);
+
+        if (swiftCodes.isEmpty()) {
+            return Optional.empty();
+        }
+
+        String countryName = swiftCodes.get(0).getCountryName();
+
+        List<SwiftCodeDto> swiftCodeDtos = swiftCodes.stream()
+                .map(code -> new SwiftCodeDto(
+                        code.getAddress(),
+                        code.getBankName(),
+                        code.getCountryISO2(),
+                        code.isHeadquarter(),
+                        code.getSwiftCode()
+                ))
+                .collect(Collectors.toList());
+
+        return Optional.of(new CountrySwiftCodesDto(countryISO2, countryName, swiftCodeDtos));
     }
 }
