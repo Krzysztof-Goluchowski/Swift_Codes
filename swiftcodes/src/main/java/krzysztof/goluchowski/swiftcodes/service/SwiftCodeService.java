@@ -2,10 +2,7 @@ package krzysztof.goluchowski.swiftcodes.service;
 
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import krzysztof.goluchowski.swiftcodes.dto.BranchDto;
-import krzysztof.goluchowski.swiftcodes.dto.CountrySwiftCodesDto;
-import krzysztof.goluchowski.swiftcodes.dto.HeadQuarterWithBranchesDto;
-import krzysztof.goluchowski.swiftcodes.dto.SwiftCodeDto;
+import krzysztof.goluchowski.swiftcodes.dto.*;
 import krzysztof.goluchowski.swiftcodes.model.SwiftCode;
 import krzysztof.goluchowski.swiftcodes.repository.SwiftCodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -125,5 +122,26 @@ public class SwiftCodeService {
                 .collect(Collectors.toList());
 
         return Optional.of(new CountrySwiftCodesDto(countryISO2, countryName, swiftCodeDtos));
+    }
+
+    public boolean addSwiftCode(AddSwiftCodeRequestDto request) {
+        if (repository.existsById(request.getSwiftCode())) {
+            return false;
+        }
+
+        SwiftCode newSwiftCode = new SwiftCode(
+                request.getSwiftCode(),
+                request.isHeadquarter() ? null : request.getSwiftCode().substring(8),
+                request.isHeadquarter(),
+                request.getBankName(),
+                request.getAddress(),
+                null,
+                request.getCountryISO2(),
+                request.getCountryName(),
+                null
+        );
+
+        repository.save(newSwiftCode);
+        return true;
     }
 }
