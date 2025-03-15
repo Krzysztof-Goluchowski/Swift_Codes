@@ -79,7 +79,7 @@ public class SwiftCodeService {
     }
 
     public boolean addSwiftCode(AddSwiftCodeRequestDto request) {
-        if (repository.existsById(request.getSwiftCode())) {
+        if (repository.existsById(request.getSwiftCode().toUpperCase())) {
             return false;
         }
 
