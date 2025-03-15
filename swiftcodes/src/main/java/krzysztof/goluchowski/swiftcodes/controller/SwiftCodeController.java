@@ -55,4 +55,16 @@ public class SwiftCodeController {
                     .body(Map.of("message", "SWIFT code already exists"));
         }
     }
+
+    @DeleteMapping("/{swiftCode}")
+    public ResponseEntity<Map<String, String>> deleteSwiftCode(@PathVariable String swiftCode) {
+        boolean isDeleted = service.deleteSwiftCode(swiftCode);
+
+        if (isDeleted) {
+            return ResponseEntity.ok(Map.of("message", "SWIFT code deleted successfully"));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "SWIFT code not found"));
+        }
+    }
 }

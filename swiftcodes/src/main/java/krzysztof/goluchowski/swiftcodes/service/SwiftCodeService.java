@@ -144,4 +144,13 @@ public class SwiftCodeService {
         repository.save(newSwiftCode);
         return true;
     }
+
+    public boolean deleteSwiftCode(String swiftCode) {
+        if(!repository.existsById(swiftCode)) {
+            return false;
+        }
+
+        repository.deleteById(swiftCode);
+        return true;
+    }
 }
