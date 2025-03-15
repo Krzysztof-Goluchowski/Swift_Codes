@@ -5,7 +5,6 @@ import krzysztof.goluchowski.swiftcodes.dto.BranchDto;
 import krzysztof.goluchowski.swiftcodes.dto.HeadquarterWithBranchesDto;
 import krzysztof.goluchowski.swiftcodes.dto.SwiftCodeDto;
 import krzysztof.goluchowski.swiftcodes.model.SwiftCode;
-import krzysztof.goluchowski.swiftcodes.service.SwiftCodeService;
 
 import java.util.List;
 import java.util.stream.Collectors;
