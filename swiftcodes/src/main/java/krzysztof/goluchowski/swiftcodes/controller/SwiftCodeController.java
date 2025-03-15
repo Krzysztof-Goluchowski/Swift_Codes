@@ -1,5 +1,6 @@
 package krzysztof.goluchowski.swiftcodes.controller;
 
+import jakarta.validation.Valid;
 import krzysztof.goluchowski.swiftcodes.dto.AddSwiftCodeRequestDto;
 import krzysztof.goluchowski.swiftcodes.dto.BranchDto;
 import krzysztof.goluchowski.swiftcodes.dto.CountrySwiftCodesDto;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @RestController
@@ -27,12 +29,12 @@ public class SwiftCodeController {
             Optional<HeadquarterWithBranchesDto> headQuarterWithBranches = service.getHeadquarterWithBranches(swiftCode);
             return headQuarterWithBranches
                     .map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
+                    .orElseThrow(() -> new NoSuchElementException("SWIFT code not found"));
         } else {
             Optional<BranchDto> branchDto = service.getBranch(swiftCode);
             return branchDto
                     .map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
+                    .orElseThrow(() -> new NoSuchElementException("SWIFT code not found"));
         }
     }
 
@@ -40,11 +42,11 @@ public class SwiftCodeController {
     public ResponseEntity<?> getSwiftCodesByCountry(@PathVariable String countryISO2code) {
         Optional<CountrySwiftCodesDto> response = service.getSwiftCodesByCountry(countryISO2code);
         return response.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new NoSuchElementException("SWIFT code not found"));
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> addSwiftCode(@RequestBody AddSwiftCodeRequestDto request) {
+    public ResponseEntity<Map<String, String>> addSwiftCode(@Valid @RequestBody AddSwiftCodeRequestDto request) {
         boolean isAdded = service.addSwiftCode(request);
 
         if (isAdded) {
