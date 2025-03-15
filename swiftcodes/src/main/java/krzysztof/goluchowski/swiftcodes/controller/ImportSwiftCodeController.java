@@ -14,7 +14,7 @@ public class ImportSwiftCodeController {
 
     @PostMapping("/import")
     public String importCsv() {
-        service.importSwiftCodesFromCsv("src/main/resources/swift_codes.csv");
+        service.importSwiftCodesFromCsv("/app/resources/swift_codes.csv");
         return "Import zakończony!";
     }
 }
