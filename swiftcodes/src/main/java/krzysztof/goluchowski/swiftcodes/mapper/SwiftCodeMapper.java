@@ -71,14 +71,14 @@ public class SwiftCodeMapper {
         String townName = extractTownName(request.getAddress());
 
         return new SwiftCode(
-                request.getSwiftCode(),
-                request.isHeadquarter() ? null : request.getSwiftCode().substring(8),
+                request.getSwiftCode().toUpperCase(),
+                request.isHeadquarter() ? null : request.getSwiftCode().substring(8).toUpperCase(),
                 request.isHeadquarter(),
-                request.getBankName(),
-                request.getAddress(),
-                townName,
-                request.getCountryISO2(),
-                request.getCountryName(),
+                request.getBankName().toUpperCase(),
+                request.getAddress().toUpperCase(),
+                townName.toUpperCase(),
+                request.getCountryISO2().toUpperCase(),
+                request.getCountryName().toUpperCase(),
                 null
         );
     }
