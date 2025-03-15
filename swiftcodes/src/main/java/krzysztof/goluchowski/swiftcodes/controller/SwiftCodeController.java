@@ -3,7 +3,7 @@ package krzysztof.goluchowski.swiftcodes.controller;
 import krzysztof.goluchowski.swiftcodes.dto.AddSwiftCodeRequestDto;
 import krzysztof.goluchowski.swiftcodes.dto.BranchDto;
 import krzysztof.goluchowski.swiftcodes.dto.CountrySwiftCodesDto;
-import krzysztof.goluchowski.swiftcodes.dto.HeadQuarterWithBranchesDto;
+import krzysztof.goluchowski.swiftcodes.dto.HeadquarterWithBranchesDto;
 import krzysztof.goluchowski.swiftcodes.service.SwiftCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ public class SwiftCodeController {
         boolean isHeadquarter = swiftCode.endsWith("XXX");
 
         if (isHeadquarter) {
-            Optional<HeadQuarterWithBranchesDto> headQuarterWithBranches = service.getHeadquarterWithBranches(swiftCode);
+            Optional<HeadquarterWithBranchesDto> headQuarterWithBranches = service.getHeadquarterWithBranches(swiftCode);
             return headQuarterWithBranches
                     .map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());

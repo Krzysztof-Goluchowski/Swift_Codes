@@ -3,6 +3,7 @@ package krzysztof.goluchowski.swiftcodes.service;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import krzysztof.goluchowski.swiftcodes.dto.*;
+import krzysztof.goluchowski.swiftcodes.mapper.SwiftCodeMapper;
 import krzysztof.goluchowski.swiftcodes.model.SwiftCode;
 import krzysztof.goluchowski.swiftcodes.repository.SwiftCodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class SwiftCodeService {
             for (String[] row : rows) {
                 if (row.length < 8) continue;
 
-                SwiftCode swiftCodeObj = getSwiftCode(row);
+                SwiftCode swiftCodeObj = SwiftCodeMapper.rowToSwiftCode(row);
 
                 if (repository.existsById(swiftCodeObj.getSwiftCode())) continue;
 
@@ -41,65 +42,24 @@ public class SwiftCodeService {
         }
     }
 
-    private static SwiftCode getSwiftCode(String[] row) {
-        String swiftCode = row[1].trim().toUpperCase();
-        boolean isHeadquarter = swiftCode.endsWith("XXX");
-        String branchCode = isHeadquarter ? null : swiftCode.substring(8);
-
-        return new SwiftCode(
-                swiftCode,
-                branchCode,
-                isHeadquarter,
-                row[3].trim(),
-                row[4].trim(),
-                row[5].trim(),
-                row[0].trim().toUpperCase(),
-                row[6].trim().toUpperCase(),
-                row[7].trim()
-        );
-    }
-
-    public Optional<HeadQuarterWithBranchesDto> getHeadquarterWithBranches(String swiftCode) {
+    public Optional<HeadquarterWithBranchesDto> getHeadquarterWithBranches(String swiftCode) {
         Optional<SwiftCode> headquarter = repository.findById(swiftCode);
 
         if (headquarter.isEmpty()) {
             return Optional.empty();
         }
 
-        List<BranchDto> branches = repository.findBySwiftCodeStartingWith(swiftCode.substring(0, 8))
+        List<SwiftCode> branches = repository.findBySwiftCodeStartingWith(swiftCode.substring(0, 8))
                 .stream()
                 .filter(branch -> !branch.getSwiftCode().equals(swiftCode))
-                .map(branch -> new BranchDto(
-                        branch.getAddress(),
-                        branch.getBankName(),
-                        branch.getCountryISO2(),
-                        branch.getCountryName(),
-                        branch.isHeadquarter(),
-                        branch.getSwiftCode()
-                ))
                 .collect(Collectors.toList());
 
-        return Optional.of(new HeadQuarterWithBranchesDto(
-                headquarter.get().getAddress(),
-                headquarter.get().getBankName(),
-                headquarter.get().getCountryISO2(),
-                headquarter.get().getCountryName(),
-                headquarter.get().isHeadquarter(),
-                headquarter.get().getSwiftCode(),
-                branches
-        ));
+        return Optional.of(SwiftCodeMapper.toHeadquarterDto(headquarter.get(), branches));
     }
 
     public Optional<BranchDto> getBranch(String swiftCode) {
         return repository.findById(swiftCode)
-                .map(branch -> new BranchDto(
-                        branch.getAddress(),
-                        branch.getBankName(),
-                        branch.getCountryISO2(),
-                        branch.getCountryName(),
-                        branch.isHeadquarter(),
-                        branch.getSwiftCode()
-                ));
+                .map(SwiftCodeMapper::toBranchDto);
     }
 
     public Optional<CountrySwiftCodesDto> getSwiftCodesByCountry(String countryISO2) {
@@ -112,13 +72,7 @@ public class SwiftCodeService {
         String countryName = swiftCodes.get(0).getCountryName();
 
         List<SwiftCodeDto> swiftCodeDtos = swiftCodes.stream()
-                .map(code -> new SwiftCodeDto(
-                        code.getAddress(),
-                        code.getBankName(),
-                        code.getCountryISO2(),
-                        code.isHeadquarter(),
-                        code.getSwiftCode()
-                ))
+                .map(SwiftCodeMapper::toSwiftCodeDto)
                 .collect(Collectors.toList());
 
         return Optional.of(new CountrySwiftCodesDto(countryISO2, countryName, swiftCodeDtos));
@@ -129,20 +83,29 @@ public class SwiftCodeService {
             return false;
         }
 
-        SwiftCode newSwiftCode = new SwiftCode(
-                request.getSwiftCode(),
-                request.isHeadquarter() ? null : request.getSwiftCode().substring(8),
-                request.isHeadquarter(),
-                request.getBankName(),
-                request.getAddress(),
-                null,
-                request.getCountryISO2(),
-                request.getCountryName(),
-                null
-        );
+        SwiftCode newSwiftCode = SwiftCodeMapper.requestToSwiftCode(request);
+
+        String timeZone = getTimeZoneForTown(newSwiftCode.getTownName());
+        newSwiftCode.setTimeZone(timeZone);
 
         repository.save(newSwiftCode);
         return true;
+    }
+
+    private String getTimeZoneForTown(String townName) {
+        if (townName == null) {
+            return null;
+        }
+
+        List<SwiftCode> swiftCodes = repository.findByTownName(townName);
+
+        for (SwiftCode swiftCode : swiftCodes) {
+            if (swiftCode.getTimeZone() != null) {
+                return swiftCode.getTimeZone();
+            }
+        }
+
+        return null;
     }
 
     public boolean deleteSwiftCode(String swiftCode) {

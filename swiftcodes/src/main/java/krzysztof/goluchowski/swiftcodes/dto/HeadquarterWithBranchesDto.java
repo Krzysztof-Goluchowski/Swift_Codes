@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class HeadQuarterWithBranchesDto {
+public class HeadquarterWithBranchesDto {
     private String address;
     private String bankName;
     private String countryISO2;
