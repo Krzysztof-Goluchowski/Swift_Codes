@@ -1,6 +1,7 @@
 package krzysztof.goluchowski.swiftcodes.controller;
 
 import krzysztof.goluchowski.swiftcodes.dto.BranchDto;
+import krzysztof.goluchowski.swiftcodes.dto.CountrySwiftCodesDto;
 import krzysztof.goluchowski.swiftcodes.dto.HeadQuarterWithBranchesDto;
 import krzysztof.goluchowski.swiftcodes.service.SwiftCodeService;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +36,12 @@ public class SwiftCodeController {
                     .map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
         }
+    }
+
+    @GetMapping("/country/{countryISO2code}")
+    public ResponseEntity<?> getSwiftCodesByCountry(@PathVariable String countryISO2code) {
+        Optional<CountrySwiftCodesDto> response = service.getSwiftCodesByCountry(countryISO2code);
+        return response.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
