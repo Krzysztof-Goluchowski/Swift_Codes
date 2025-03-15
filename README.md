@@ -23,6 +23,7 @@ This application allows users to manage SWIFT codes, including parsing the data 
 
 ### Prerequisites
 
+- Gradle
 - Docker
 - Docker Compose
 
@@ -34,6 +35,7 @@ This application allows users to manage SWIFT codes, including parsing the data 
    ```
 2. Build and run the application using Docker:
    ```bash
+   gradle build
    docker build -t swiftcodes-app .
    docker-compose up --build
    ```
